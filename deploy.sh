@@ -16,7 +16,9 @@ case $DEPLOY_TARGET in
       exit 1
     fi
     echo "📦 Deploying to Netlify..."
-    netlify deploy --prod --dir=.
+    npm install
+    npm run build
+    netlify deploy --prod --dir=dist
     ;;
     
   vercel)
@@ -25,6 +27,8 @@ case $DEPLOY_TARGET in
       exit 1
     fi
     echo "📦 Deploying to Vercel..."
+    npm install
+    npm run build
     vercel --prod
     ;;
     

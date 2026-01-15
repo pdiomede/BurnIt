@@ -4,10 +4,11 @@
   "description": "Mini app for burning coins/tokens on Base blockchain",
   "main": "index.html",
   "scripts": {
-    "start": "python3 server.py",
-    "serve": "python3 server.py",
-    "deploy:netlify": "netlify deploy --prod",
-    "deploy:vercel": "vercel --prod"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy:netlify": "npm run build && netlify deploy --prod --dir=dist",
+    "deploy:vercel": "npm run build && vercel --prod"
   },
   "keywords": [
     "base",
@@ -19,6 +20,16 @@
   ],
   "author": "",
   "license": "MIT",
-  "devDependencies": {},
-  "dependencies": {}
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "vite": "^5.4.2"
+  },
+  "dependencies": {
+    "@coinbase/onchainkit": "^0.29.0",
+    "@tanstack/react-query": "^5.51.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "viem": "^2.21.0",
+    "wagmi": "^2.12.8"
+  }
 }

@@ -16,26 +16,23 @@ A web-based mini app for Base that allows you to burn coins/tokens from ERC20 co
 
 ### Local Development
 
-1. **Serve the files** using a local web server:
+1. **Install and run**:
 
 ```bash
 cd mini-app
-python3 server.py
+npm install
+npm run dev
 ```
 
-Or manually:
+2. **Open in browser**: Use the URL printed by Vite (usually `http://localhost:5173`)
+
+### Optional: OnchainKit API Key
+
+Some OnchainKit components use an API key. If you have one, create a `.env` file:
+
 ```bash
-# Using Python 3
-python3 -m http.server 8000
-
-# Using Node.js (if you have http-server installed)
-npx http-server -p 8000
-
-# Using PHP
-php -S localhost:8000
+VITE_ONCHAINKIT_API_KEY=your_key_here
 ```
-
-2. **Open in browser**: Navigate to `http://localhost:8000`
 
 ## Deployment
 
@@ -45,14 +42,21 @@ php -S localhost:8000
 
 **Option A: Drag & Drop**
 1. Go to [netlify.com](https://netlify.com)
-2. Drag the `mini-app` folder to the deploy area
-3. Done! Your app is live instantly
+2. Build locally:
+   ```bash
+   npm install
+   npm run build
+   ```
+3. Drag the `dist` folder to the deploy area
+4. Done! Your app is live instantly
 
 **Option B: CLI**
 ```bash
 npm install -g netlify-cli
 cd mini-app
-netlify deploy --prod
+npm install
+npm run build
+netlify deploy --prod --dir=dist
 ```
 
 #### ⚡ Vercel

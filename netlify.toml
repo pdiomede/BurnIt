@@ -1,8 +1,8 @@
 # Netlify configuration for Base Coin Burner Mini App
 
 [build]
-  # No build step needed - static files only
-  publish = "."
+  command = "npm run build"
+  publish = "dist"
 
 [[headers]]
   # CORS headers for Base app integration

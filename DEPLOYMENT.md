@@ -4,25 +4,32 @@ This guide gives step-by-step, detailed instructions to deploy the mini app.
 
 ## Before You Deploy (Required)
 
-1. **Confirm the app runs locally**:
+1. **Install dependencies and run locally**:
    ```bash
    cd mini-app
-   python3 server.py
+   npm install
+   npm run dev
    ```
-   - Open `http://localhost:8000` and verify the UI loads.
+   - Open the local URL printed in the terminal (usually `http://localhost:5173`).
    - Check browser console for errors.
 
-2. **Verify required files are present** in `mini-app/`:
+2. **Optional: set OnchainKit API key** (if you have one):
+   - Create a `.env` file:
+     ```bash
+     VITE_ONCHAINKIT_API_KEY=your_key_here
+     ```
+
+3. **Verify required files are present** in `mini-app/`:
    - `index.html`
-   - `app.js`
+   - `vite.config.js`
+   - `src/` (contains `main.jsx` and `App.jsx`)
    - `styles.css`
-   - `base-integration.js`
-   - `config.js`
 
-3. **Check relative paths**:
-   - Make sure assets are referenced with relative paths (e.g. `./styles.css`).
+4. **Check relative paths**:
+   - Use the Vite import system for assets when possible.
+   - If you add public assets, put them in `public/` and reference as `/asset.png`.
 
-4. **Know your final URL**:
+5. **Know your final URL**:
    - You will need the deployed URL for Base app submission later.
 
 ## Option 1: Netlify (Recommended - Easiest)
@@ -33,8 +40,11 @@ This guide gives step-by-step, detailed instructions to deploy the mini app.
 2. Click **Add new site → Deploy manually**.
 3. Drag and drop the entire `mini-app` folder into the upload area.
 4. Wait for the deployment to finish (Netlify shows a success message).
-5. Click the generated site URL and verify it loads.
-6. Optional: click **Site settings → Change site name** to set a friendly URL.
+5. For Git‑connected sites, set:
+   - **Build command**: `npm run build`
+   - **Publish directory**: `dist`
+6. Click the generated site URL and verify it loads.
+7. Optional: click **Site settings → Change site name** to set a friendly URL.
 
 ### B) Netlify CLI (Optional)
 
@@ -49,6 +59,8 @@ This guide gives step-by-step, detailed instructions to deploy the mini app.
 3. Deploy a preview:
    ```bash
    cd mini-app
+   npm install
+   npm run build
    netlify deploy
    ```
 4. When prompted, choose **Create & configure a new site**.
@@ -229,4 +241,4 @@ For deployment issues:
 1. Check hosting provider documentation.
 2. Verify all files are uploaded correctly.
 3. Check browser console for errors.
-4. Test locally first with `python3 server.py`.
+4. Test locally first with `npm run dev`.
