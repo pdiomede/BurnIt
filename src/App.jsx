@@ -322,23 +322,17 @@ export default function App() {
       return;
     }
 
-    const confirmed = confirm(
-      'Revoking ownership is irreversible. Are you sure you want to proceed?'
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
     try {
       setRevokeLoading(true);
       setStatus({ type: 'pending', message: 'Submitting revoke ownership...' });
-      const hash = await walletClient.writeContract({
+      const { request } = await publicClient.simulateContract({
         address: contractAddress,
         abi: ERC20_ABI,
         functionName: 'revokeOwnership',
-        args: []
+        args: [],
+        account: address
       });
+      const hash = await walletClient.writeContract(request);
       setTxHash(hash);
       setStatus({
         type: 'pending',
@@ -350,7 +344,9 @@ export default function App() {
         message: '✅ Ownership revoked successfully.'
       });
     } catch (err) {
-      setError('Failed to revoke ownership. Make sure you are the owner.');
+      setError(
+        'Failed to revoke ownership. Make sure the contract supports revokeOwnership and you are the owner.'
+      );
       setStatus({ type: '', message: '' });
     } finally {
       setRevokeLoading(false);
@@ -499,11 +495,14 @@ export default function App() {
         <button
           className="btn btn-secondary"
           onClick={handleRevokeOwnership}
-          disabled={!isConnected || tokenInfo.name === '-' || revokeLoading}
+          disabled={!isConnected || !isAddress(contractAddress) || revokeLoading}
           style={{ marginTop: '12px' }}
         >
           {revokeLoading ? 'Revoking Ownership...' : 'Revoke Ownership'}
         </button>
+        <p className="token-meta" style={{ marginTop: '8px' }}>
+          Revoking ownership is irreversible. Only the contract owner can do this.
+        </p>
       </div>
 
       {status.message && (
