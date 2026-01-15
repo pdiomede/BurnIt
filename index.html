@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base Coin Burner</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    <!-- Base integration helper -->
+    <script src="base-integration.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔥 Base Coin Burner</h1>
+            <p class="subtitle">Burn your coins/posts on Base</p>
+        </header>
+
+        <div class="wallet-section">
+            <div id="wallet-status" class="wallet-status disconnected">
+                <span class="status-icon">🔌</span>
+                <span class="status-text">Not Connected</span>
+            </div>
+            <button id="connect-wallet" class="btn btn-primary">Connect Wallet</button>
+            <div id="wallet-info" class="wallet-info hidden">
+                <p><strong>Address:</strong> <span id="wallet-address"></span></p>
+                <p><strong>Network:</strong> <span id="network-name"></span></p>
+            </div>
+        </div>
+
+        <div class="burn-section">
+            <div class="form-group">
+                <label for="contract-address">Coin Contract Address</label>
+                <input 
+                    type="text" 
+                    id="contract-address" 
+                    placeholder="0x..." 
+                    class="input-field"
+                >
+                <button id="load-contract" class="btn btn-secondary">Load Contract</button>
+            </div>
+
+            <div id="contract-info" class="contract-info hidden">
+                <div class="info-card">
+                    <h3>Contract Information</h3>
+                    <p><strong>Name:</strong> <span id="token-name">-</span></p>
+                    <p><strong>Symbol:</strong> <span id="token-symbol">-</span></p>
+                    <p><strong>Your Balance:</strong> <span id="token-balance">-</span></p>
+                    <p><strong>Decimals:</strong> <span id="token-decimals">-</span></p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="burn-amount">Amount to Burn</label>
+                <input 
+                    type="number" 
+                    id="burn-amount" 
+                    placeholder="0.0" 
+                    step="0.000001"
+                    min="0"
+                    class="input-field"
+                >
+                <div class="button-group">
+                    <button id="burn-max" class="btn btn-link">Burn Max</button>
+                    <button id="burn-half" class="btn btn-link">Burn Half</button>
+                </div>
+            </div>
+
+            <button id="burn-button" class="btn btn-danger" disabled>
+                🔥 Burn Coins
+            </button>
+        </div>
+
+        <div id="transaction-status" class="transaction-status hidden">
+            <h3>Transaction Status</h3>
+            <div id="status-message" class="status-message"></div>
+            <div id="tx-hash" class="tx-hash hidden"></div>
+        </div>
+
+        <div id="error-message" class="error-message hidden"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

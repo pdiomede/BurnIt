@@ -1,0 +1,25 @@
+# Netlify configuration for Base Coin Burner Mini App
+
+[build]
+  # No build step needed - static files only
+  publish = "."
+
+[[headers]]
+  # CORS headers for Base app integration
+  for = "/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type"
+    X-Frame-Options = "ALLOWALL"
+    X-Content-Type-Options = "nosniff"
+
+[[redirects]]
+  # SPA fallback - redirect all routes to index.html
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Environment variables (if needed)
+# [build.environment]
+#   NODE_VERSION = "18"

@@ -1,0 +1,24 @@
+{
+  "name": "base-coin-burner-mini-app",
+  "version": "1.0.0",
+  "description": "Mini app for burning coins/tokens on Base blockchain",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 server.py",
+    "serve": "python3 server.py",
+    "deploy:netlify": "netlify deploy --prod",
+    "deploy:vercel": "vercel --prod"
+  },
+  "keywords": [
+    "base",
+    "blockchain",
+    "ethereum",
+    "web3",
+    "burn",
+    "token"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {}
+}
