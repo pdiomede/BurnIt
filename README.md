@@ -34,6 +34,14 @@ Some OnchainKit components use an API key. If you have one, create a `.env` file
 VITE_ONCHAINKIT_API_KEY=your_key_here
 ```
 
+### Optional: Token List API Key
+
+The wallet token list uses Covalent. Add:
+
+```bash
+VITE_COVALENT_API_KEY=your_key_here
+```
+
 ## Deployment
 
 ### Quick Deploy (Choose One)

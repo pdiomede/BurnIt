@@ -19,17 +19,23 @@ This guide gives step-by-step, detailed instructions to deploy the mini app.
      VITE_ONCHAINKIT_API_KEY=your_key_here
      ```
 
-3. **Verify required files are present** in `mini-app/`:
+3. **Optional: set Covalent API key** (to list wallet tokens):
+   - Create a `.env` file:
+     ```bash
+     VITE_COVALENT_API_KEY=your_key_here
+     ```
+
+4. **Verify required files are present** in `mini-app/`:
    - `index.html`
    - `vite.config.js`
    - `src/` (contains `main.jsx` and `App.jsx`)
    - `styles.css`
 
-4. **Check relative paths**:
+5. **Check relative paths**:
    - Use the Vite import system for assets when possible.
    - If you add public assets, put them in `public/` and reference as `/asset.png`.
 
-5. **Know your final URL**:
+6. **Know your final URL**:
    - You will need the deployed URL for Base app submission later.
 
 ## Option 1: Netlify (Recommended - Easiest)

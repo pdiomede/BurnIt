@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   useAccount,
   useChainId,
@@ -53,6 +53,13 @@ const ERC20_ABI = [
       { name: 'amount', type: 'uint256' }
     ],
     outputs: []
+  },
+  {
+    name: 'revokeOwnership',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [],
+    outputs: []
   }
 ];
 
@@ -68,6 +75,8 @@ const EMPTY_TOKEN = {
   balance: '0'
 };
 
+const COVALENT_API_KEY = import.meta.env.VITE_COVALENT_API_KEY || '';
+
 export default function App() {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
@@ -80,6 +89,10 @@ export default function App() {
   const [status, setStatus] = useState({ type: '', message: '' });
   const [txHash, setTxHash] = useState('');
   const [error, setError] = useState('');
+  const [tokens, setTokens] = useState([]);
+  const [tokensLoading, setTokensLoading] = useState(false);
+  const [tokensError, setTokensError] = useState('');
+  const [revokeLoading, setRevokeLoading] = useState(false);
 
   const networkLabel = useMemo(
     () => CHAIN_LABELS[chainId] || `Chain ID: ${chainId || '-'}`,
@@ -90,6 +103,63 @@ export default function App() {
     setError('');
     setStatus({ type: '', message: '' });
   };
+
+  useEffect(() => {
+    const fetchTokens = async () => {
+      setTokensError('');
+      setTokens([]);
+
+      if (!isConnected || !address) {
+        return;
+      }
+
+      if (!COVALENT_API_KEY) {
+        setTokensError('Set VITE_COVALENT_API_KEY to load wallet tokens.');
+        return;
+      }
+
+      const supportedChains = [8453, 84532];
+      if (!supportedChains.includes(chainId)) {
+        setTokensError('Token list is supported on Base and Base Sepolia only.');
+        return;
+      }
+
+      try {
+        setTokensLoading(true);
+        const response = await fetch(
+          `https://api.covalenthq.com/v1/${chainId}/address/${address}/balances_v2/?key=${COVALENT_API_KEY}`
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch tokens.');
+        }
+        const payload = await response.json();
+        const items = payload?.data?.items || [];
+        const parsed = items
+          .filter((item) => item.contract_address && item.contract_decimals !== null)
+          .map((item) => {
+            const decimals = Number(item.contract_decimals || 0);
+            const rawBalance = BigInt(item.balance || '0');
+            return {
+              address: item.contract_address,
+              name: item.contract_name || 'Unknown',
+              symbol: item.contract_ticker_symbol || '',
+              decimals,
+              balance: rawBalance,
+              formattedBalance: formatUnits(rawBalance, decimals)
+            };
+          })
+          .filter((item) => item.balance > 0n);
+
+        setTokens(parsed);
+      } catch (err) {
+        setTokensError('Unable to load token list. Check API key and network.');
+      } finally {
+        setTokensLoading(false);
+      }
+    };
+
+    fetchTokens();
+  }, [address, isConnected, chainId]);
 
   const handleLoadContract = async () => {
     resetMessages();
@@ -227,6 +297,66 @@ export default function App() {
 
   const explorerBase = chainId === 84532 ? 'https://sepolia.basescan.org' : 'https://basescan.org';
 
+  const handleUseToken = (token) => {
+    setContractAddress(token.address);
+    setTokenInfo({
+      name: token.name || '-',
+      symbol: token.symbol || '-',
+      decimals: token.decimals || 18,
+      balance: token.formattedBalance || '0'
+    });
+    setBurnAmount(token.formattedBalance || '');
+    resetMessages();
+  };
+
+  const handleRevokeOwnership = async () => {
+    resetMessages();
+
+    if (!walletClient) {
+      setError('Please connect your wallet first.');
+      return;
+    }
+
+    if (!isAddress(contractAddress)) {
+      setError('Please enter a valid contract address.');
+      return;
+    }
+
+    const confirmed = confirm(
+      'Revoking ownership is irreversible. Are you sure you want to proceed?'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setRevokeLoading(true);
+      setStatus({ type: 'pending', message: 'Submitting revoke ownership...' });
+      const hash = await walletClient.writeContract({
+        address: contractAddress,
+        abi: ERC20_ABI,
+        functionName: 'revokeOwnership',
+        args: []
+      });
+      setTxHash(hash);
+      setStatus({
+        type: 'pending',
+        message: 'Transaction sent! Waiting for confirmation...'
+      });
+      await publicClient.waitForTransactionReceipt({ hash });
+      setStatus({
+        type: 'success',
+        message: '✅ Ownership revoked successfully.'
+      });
+    } catch (err) {
+      setError('Failed to revoke ownership. Make sure you are the owner.');
+      setStatus({ type: '', message: '' });
+    } finally {
+      setRevokeLoading(false);
+    }
+  };
+
   return (
     <div className="container">
       <header>
@@ -262,6 +392,39 @@ export default function App() {
             <strong>Network:</strong>{' '}
             <span id="network-name">{networkLabel}</span>
           </p>
+        </div>
+      </div>
+
+      <div className="token-section">
+        <div className="info-card">
+          <h3>Wallet Tokens</h3>
+          {!isConnected && <p>Connect your wallet to load token balances.</p>}
+          {isConnected && tokensLoading && <p>Loading tokens...</p>}
+          {isConnected && tokensError && <p className="error-text">{tokensError}</p>}
+          {isConnected && !tokensLoading && !tokensError && tokens.length === 0 && (
+            <p>No ERC20 tokens found with balance.</p>
+          )}
+          {tokens.length > 0 && (
+            <div className="token-list">
+              {tokens.map((token) => (
+                <div key={token.address} className="token-item">
+                  <div>
+                    <strong>
+                      {token.name} {token.symbol ? `(${token.symbol})` : ''}
+                    </strong>
+                    <div className="token-meta">{token.formattedBalance}</div>
+                    <div className="token-meta">{token.address}</div>
+                  </div>
+                  <button
+                    className="btn btn-link"
+                    onClick={() => handleUseToken(token)}
+                  >
+                    Burn Max
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -331,6 +494,15 @@ export default function App() {
           disabled={!isConnected || tokenInfo.name === '-'}
         >
           🔥 Burn Coins
+        </button>
+
+        <button
+          className="btn btn-secondary"
+          onClick={handleRevokeOwnership}
+          disabled={!isConnected || tokenInfo.name === '-' || revokeLoading}
+          style={{ marginTop: '12px' }}
+        >
+          {revokeLoading ? 'Revoking Ownership...' : 'Revoke Ownership'}
         </button>
       </div>
 

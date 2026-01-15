@@ -225,6 +225,39 @@ header h1 {
     border-left: 4px solid #667eea;
 }
 
+.token-section {
+    margin-bottom: 30px;
+}
+
+.token-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.token-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.token-meta {
+    font-size: 0.85em;
+    color: #666;
+    word-break: break-all;
+}
+
+.error-text {
+    color: #c62828;
+    font-weight: 600;
+}
+
 .info-card h3 {
     color: #667eea;
     margin-bottom: 15px;
