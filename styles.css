@@ -247,6 +247,13 @@ header h1 {
     background: #fff;
 }
 
+.token-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-end;
+}
+
 .token-meta {
     font-size: 0.85em;
     color: #666;

@@ -309,7 +309,7 @@ export default function App() {
     resetMessages();
   };
 
-  const handleRevokeOwnership = async () => {
+  const handleRevokeOwnership = async (overrideAddress) => {
     resetMessages();
 
     if (!walletClient) {
@@ -317,7 +317,8 @@ export default function App() {
       return;
     }
 
-    if (!isAddress(contractAddress)) {
+    const targetAddress = overrideAddress || contractAddress;
+    if (!isAddress(targetAddress)) {
       setError('Please enter a valid contract address.');
       return;
     }
@@ -326,7 +327,7 @@ export default function App() {
       setRevokeLoading(true);
       setStatus({ type: 'pending', message: 'Submitting revoke ownership...' });
       const { request } = await publicClient.simulateContract({
-        address: contractAddress,
+        address: targetAddress,
         abi: ERC20_ABI,
         functionName: 'revokeOwnership',
         args: [],
@@ -350,6 +351,61 @@ export default function App() {
       setStatus({ type: '', message: '' });
     } finally {
       setRevokeLoading(false);
+    }
+  };
+
+  const handleBurnMaxToken = async (token) => {
+    resetMessages();
+
+    if (!walletClient) {
+      setError('Please connect your wallet first.');
+      return;
+    }
+
+    if (!isAddress(token.address)) {
+      setError('Invalid token address.');
+      return;
+    }
+
+    if (!token.formattedBalance || Number(token.formattedBalance) <= 0) {
+      setError('No balance to burn.');
+      return;
+    }
+
+    try {
+      setStatus({ type: 'pending', message: 'Preparing transaction...' });
+      const amountWei = parseUnits(token.formattedBalance, token.decimals);
+      let hash;
+      try {
+        hash = await walletClient.writeContract({
+          address: token.address,
+          abi: ERC20_ABI,
+          functionName: 'burn',
+          args: [amountWei]
+        });
+      } catch (err) {
+        hash = await walletClient.writeContract({
+          address: token.address,
+          abi: ERC20_ABI,
+          functionName: 'burnFrom',
+          args: [address, amountWei]
+        });
+      }
+
+      setTxHash(hash);
+      setStatus({
+        type: 'pending',
+        message: 'Transaction sent! Waiting for confirmation...'
+      });
+
+      await publicClient.waitForTransactionReceipt({ hash });
+      setStatus({
+        type: 'success',
+        message: `✅ Successfully burned ${token.formattedBalance} ${token.symbol}!`
+      });
+    } catch (err) {
+      setError('Transaction failed. Make sure the contract supports burning.');
+      setStatus({ type: '', message: '' });
     }
   };
 
@@ -411,12 +467,26 @@ export default function App() {
                     <div className="token-meta">{token.formattedBalance}</div>
                     <div className="token-meta">{token.address}</div>
                   </div>
-                  <button
-                    className="btn btn-link"
-                    onClick={() => handleUseToken(token)}
-                  >
-                    Burn Max
-                  </button>
+                  <div className="token-actions">
+                    <button
+                      className="btn btn-link"
+                      onClick={() => handleUseToken(token)}
+                    >
+                      Fill Burn Max
+                    </button>
+                    <button
+                      className="btn btn-link"
+                      onClick={() => handleBurnMaxToken(token)}
+                    >
+                      Burn Max
+                    </button>
+                    <button
+                      className="btn btn-link"
+                      onClick={() => handleRevokeOwnership(token.address)}
+                    >
+                      Revoke Ownership
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
